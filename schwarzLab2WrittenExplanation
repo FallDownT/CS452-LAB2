@@ -1,0 +1,19 @@
+Chris Schwarz
+- initShaders takes in a pointer to a ShaderInfo struct.  It uses this pointer
+    to create a vector of these shaders.  With this vector, the function
+    creates and uses a program created from these shaders.
+- inputShader reads in and returns the shader file denoted by the inputted
+    filename.
+- createShader takes the shader (presumably read in from inputShader) and
+    compiles the shader.  If the shader fails to compile, a log is printed
+    to stderr.  Regardless of whether the compile was successful, the shader
+    GLuint is returned.
+- createProgram takes in a vector of shaders.  A program is created, shaders
+    are attached, and attributes are bound to locations.  The program is
+    linked to your actual code (lab2.cpp) and is returned.  If the link fails,
+    a log is written to stderr.
+- Once shaders have been initialized, the buffer objects and array objects are
+    generated and bound.  The verticies are drawn and then the verticies are
+    filled with color.  Position and color attributes are distinguished by the
+    locations which are bound in createProgram (in this case 0 for position, 1
+    for color).

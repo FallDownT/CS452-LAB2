@@ -1,28 +1,30 @@
-#include "initShaders.h"
+#include "lab2InitShaders.h"
 using namespace std;
 int counter=0;//counter to increase how many vertices are going to be drawn at a given time
 
 GLuint vaoID, vboID[2];//vao and vbo names
 
-GLfloat vertexarray[]={0.5f,0.5f,0.0f,//vertice array
-			     1.0f,0.0f,0.0f,
-                       0.5f,-0.5f,0.0f, 
-                       0.0f,-1.0f,0.0f,
-                       -0.5f,-0.5f,0.0f, 
-                       -1.0f,0.0f,0.0f,
-                       -0.5f,0.5f,0.0f,
-                      	0.0f,1.0f,0.0f
+GLfloat vertexarray[]={0.0f,0.2f,0.0f,//vertice array
+                       -0.6f,0.2f,0.0f,
+			     			  0.0f,0.8f,0.0f,
+                       0.6f,0.2f,0.0f, 
+                       0.5f,0.2f,0.0f,
+                       0.5f,-0.8f,0.0f,
+                       -0.5f,-0.8f,0.0f, 
+                       -0.5f,0.2f,0.0f,
+                       -0.6f,0.2f,0.0f,
                        };
                        
-GLfloat colorarray[]={1.0f,0.5f,0.0f,1.0f,//color array
-                       1.0f,1.0f,0.0f,1.0f,
-                       1.0f,1.0f,0.0f,1.0f,
-                       1.0f,1.0f,0.0f,1.0f,
-                       1.0f,1.0f,0.0f,1.0f,
-                       1.0f,1.0f,0.0f,1.0f,
-                       0.5f,0.5f,0.5f,1.0f,
-                       1.0f,0.5f,1.0f,1.0f
-                       };                       
+GLfloat colorarray[]={1.0f,0.0f,0.0f,1.0f,//color array
+                      0.7f,0.5f,0.3f,1.0f,
+                      0.7f,0.5f,0.3f,1.0f,
+                      0.7f,0.5f,0.3f,1.0f,
+                      1.0f,0.0f,0.0f,1.0f,
+                      1.0f,0.0f,0.0f,1.0f,
+                      1.0f,0.0f,0.0f,1.0f,
+                      1.0f,0.0f,0.0f,1.0f,
+                      0.0f,0.0f,0.0f,1.0f
+                      };                       
 
 void init(){
 
@@ -52,7 +54,7 @@ void init(){
 
 void drawscene(){
   glClear(GL_COLOR_BUFFER_BIT);
-  glDrawArrays(GL_POLYGON,0,3+(counter%6));
+  glDrawArrays(GL_TRIANGLE_FAN,0,3+(counter%7));
   glFlush();
 }
 
@@ -69,7 +71,7 @@ void mousepress(int button, int state, int x, int y){
 int main(int argc,char ** argv){
 
   glutInit(&argc, argv);
-  glutCreateWindow("Shapes");//creates the window with the specified name
+  glutCreateWindow("Schwarz Lab 2-It's kinda a house");//creates the window with the specified name
   
   //initializes glew
   glewExperimental=GL_TRUE;
