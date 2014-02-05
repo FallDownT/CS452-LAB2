@@ -3,25 +3,43 @@
 // -----------------------
 #include "lab2InitShaders.h"
 
+
+// ---------------------------
+// --- P R O T O T Y P E S ---
+// ---------------------------
+const GLchar* inputShader(const char* filename);
+GLuint createShader(GLenum type, const GLchar* shadeSource);
+GLuint createProgram(const vector<GLuint> shadeList);
+
+
+// -----------------------------------------------
+// --- F U N C T I O N   D E F I N I T I O N S ---
+// -----------------------------------------------
+
 // ----------------------------------------------------------------------------
-// - initShaders takes in a pointer to a ShaderInfo struct.  It uses this pointer
-// -   to create a vector of these shaders.  With this vector, the function
-// -   creates and uses a program created from these shaders.
+// - initShaders takes in a pointer to a ShaderInfo struct.  It uses this
+// -   pointer to create a vector of these shaders.  With this vector, the
+// -   function creates and uses a program created from these shaders.
 // ----------------------------------------------------------------------------
 void initShaders(ShaderInfo* shaders)
 {
-	ShaderInfo* shade=shaders;
-	vector<GLuint> Shadelist;	//initialize list of shaders
-  
-	while(shade->type != GL_NONE)	//loop through all the shaders in the list
+	// Declare data members
+	ShaderInfo* shade = shaders;
+	vector<GLuint> Shadelist;
+	GLuint program;
+
+	// Iterate through shaders and add all shaders to ShadeList
+	while(shade->type != GL_NONE)
 	{
-		Shadelist.push_back(createShader(shade->type,inputShader(shade->filename)));	//adding shaders into the list
+		Shadelist.push_back(createShader(shade->type,inputShader(shade->filename)));
 		++shade;
 	}
-  
-	GLuint program=createProgram(Shadelist);	//creates the program linking to all the shaders
-  
-	glUseProgram(program);	//installs a program object as part of current rendering state
+
+	// Creates a program which links all shaders with your OpenGL program
+	program = createProgram(Shadelist);
+
+	// Installs program incorporating shaders into OpenGL program
+	glUseProgram(program);
 }
 
 // ----------------------------------------------------------------------------
@@ -30,34 +48,44 @@ void initShaders(ShaderInfo* shaders)
 // ----------------------------------------------------------------------------
 const GLchar* inputShader(const char* filename)
 {
-	FILE* fshade = fopen(filename, "rb");//opens file
-  
-  if(!fshade){//check to see if file is opened
-    fprintf(stderr,"unable to open file '%s'\n",filename);
-    return NULL;
-  }
-  
-  //neat way to get the length of the file
-  fseek(fshade, 0, SEEK_END);
-  long filesize=ftell(fshade);
-  fseek(fshade, 0, SEEK_SET);
-  
-  
-  //allocates memory for the file and read in the file 
-  GLchar* shadingSource= new GLchar[filesize+1];//
-  fread(shadingSource, 1, filesize, fshade);
-  
-  
-  if(ftell(fshade) == 0){//checks to see if the file is empty
-    fprintf(stderr, "File '%s' is empty.\n",filename);
-    return NULL;
-  }
+	// Open the file
+	FILE* fshade = fopen(filename, "rb");
 
-  fclose(fshade);//closes file
-  
-  shadingSource[filesize] = 0;//neat way to set a '\0' at end of file
-  
-  return const_cast<const GLchar*>(shadingSource);//overloads the const so the value with change per file
+	// If file is open, print error and return
+	if(!fshade)
+	{
+		fprintf(stderr,"unable to open file '%s'\n",filename);
+		return NULL;
+	}
+
+	// Get the length of the file in ASCII characters
+	fseek(fshade, 0, SEEK_END);
+	long filesize=ftell(fshade);
+
+	// Reset position to beginning of file
+	fseek(fshade, 0, SEEK_SET);
+
+
+	// Read in the file 
+	GLchar* shadingSource= new GLchar[filesize+1];//
+	fread(shadingSource, 1, filesize, fshade);
+
+
+	// If file is empty, print error and return
+	if(ftell(fshade) == 0)
+	{
+		fprintf(stderr, "File '%s' is empty.\n",filename);
+		return NULL;
+	}
+
+	// Close the file
+	fclose(fshade);
+
+	// Add null terminating character to end of file
+	shadingSource[filesize] = 0;
+
+	// Return the file's text
+	return const_cast<const GLchar*>(shadingSource);
 }
 
 // ----------------------------------------------------------------------------
@@ -68,31 +96,44 @@ const GLchar* inputShader(const char* filename)
 // ----------------------------------------------------------------------------
 GLuint createShader(GLenum type, const GLchar* shadeSource)
 {
-	GLuint shader = glCreateShader(type);//create shader based on type GL_VERTEX_SHADER or GL_FRAGMENT_SHADER
- 	glShaderSource(shader, 1, &shadeSource, NULL);//loads the source code of the file into the shader
+	// Create a shader based on type GL_VERTEX_SHADER or GL_FRAGMENT_SHADER
+	GLuint shader = glCreateShader(type);
+ 	glShaderSource(shader, 1, &shadeSource, NULL);
 
-	glCompileShader(shader);//compiles a shader object
-  
-	GLint compileStatus;//status of the compilation variable
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);//returns the compile status into the variable
-  
-	if(!compileStatus){//checks to see if the shader compiled
-		GLint logSize;//variable for size of the debug info
-		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logSize);//returns the size of the the source file into the variable
-    
-		GLchar* infoLog = new GLchar[logSize+1];//allocating memory for the debug info
-		glGetShaderInfoLog(shader,logSize,&logSize,infoLog);//returns the error messages into the variable infoLog
-    
-		const char *shadeInfo= NULL;//char array for what shader that is having an error
-		switch(type){//way to get what shader has the error
+	// Compile the shader object
+	glCompileShader(shader);
+
+	// Get the status of the compilation
+	GLint compileStatus;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
+
+	// If the shader did not compile, generate and print an error log
+	if(!compileStatus)
+	{
+		// Get the length of the shadeSource file
+		GLint logSize;
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logSize);
+
+		// Put debug info into infoLog
+		GLchar* infoLog = new GLchar[logSize+1];
+		glGetShaderInfoLog(shader,logSize,&logSize,infoLog);
+
+		// Puts which type of shader having the error in shadeInfo
+		const char *shadeInfo = NULL;
+		switch(type)
+		{
 			case GL_VERTEX_SHADER: shadeInfo = "vertex"; break;
 			case GL_GEOMETRY_SHADER_EXT: shadeInfo = "geometric"; break;
 			case GL_FRAGMENT_SHADER: shadeInfo = "fragment"; break;
 		}
-		fprintf(stderr,"\nCompile failure in %u shader: %s\n Error message:\n%s\n",type,shadeInfo,infoLog);//prints information need to debug shaders
-		delete[] infoLog;//memory management
+
+		// Prints error containing info on the erroneous shader
+		fprintf(stderr,"\nCompile failure in %u shader: %s\n Error message:\n%s\n",type,shadeInfo,infoLog);
+
+		// Deallocate dynamically allocated data members
+		delete[] infoLog;
 	}
-	return shader;//self explanatory
+	return shader;
 }
 
 // ----------------------------------------------------------------------------
@@ -103,29 +144,42 @@ GLuint createShader(GLenum type, const GLchar* shadeSource)
 // ----------------------------------------------------------------------------
 GLuint createProgram(const vector<GLuint> shadeList)
 {
-	GLuint program = glCreateProgram();//creates your program
-  
-	for(GLuint i=0;i<shadeList.size();i++){glAttachShader(program,shadeList[i]);}//attaches shaders to program
-  
-	glBindAttribLocation(program, 0, "in_position");	//binds the position to index 0
-	glBindAttribLocation(program, 1, "in_color");		//binds the color to index 1
-	glLinkProgram(program);//links program to your program //weird
-  
-	GLint linkStatus;//status for linking variable
-	glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);//returns the status of linking the program into the variable
-  
-	if(!linkStatus)//checks to see if your program linked to the program
+	// Create a program object
+	GLuint program = glCreateProgram();
+
+	// Attach all shaders to newly created program object
+	for(GLuint i=0;i<shadeList.size();i++){glAttachShader(program,shadeList[i]);}
+
+	// Bind position attribute to 0; color attribute to 1
+	glBindAttribLocation(program, 0, "in_position");
+	glBindAttribLocation(program, 1, "in_color");
+
+	// Link program oject to OpenGL program
+	glLinkProgram(program);
+
+	// Get the status of the program linking
+	GLint linkStatus;
+	glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
+
+	// If link fails, generate and print an error log
+	if(!linkStatus)
 	{
-		GLint logSize;//variable for size of the debug info
-		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logSize);//returns the linking status into the variable
-    
-		GLchar *infoLog = new GLchar[logSize+1];//allocating memory for the debug info
-		glGetProgramInfoLog(program,logSize,&logSize,infoLog);//returns the error messages into the variable infoLog
-    
-		fprintf(stderr,"\nShader linking failed: %s\n",infoLog);//prints your linking failed
-		delete[] infoLog;//memory management
-    
-		for(GLuint i=0;i<shadeList.size();i++){glDeleteShader(shadeList[i]);}//memory management
+		// Get the linker status log
+		GLint logSize;
+		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logSize);
+
+
+		// Put debug info into infoLog
+		GLchar *infoLog = new GLchar[logSize+1];
+		glGetProgramInfoLog(program,logSize,&logSize,infoLog);
+
+
+		// Prints error containing info on the erroneous linking
+		fprintf(stderr,"\nShader linking failed: %s\n",infoLog);
+
+		// Deallocate dynamically allocated data members
+		delete[] infoLog;
+		for(GLuint i=0;i<shadeList.size();i++){glDeleteShader(shadeList[i]);}
 	}
-	return program;//self explanatory
+	return program;
 }

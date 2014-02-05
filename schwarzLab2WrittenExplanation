@@ -1,4 +1,14 @@
 Chris Schwarz
+
+Note: I did not rewrite the code.  Dave Shreiner said in the SIGGRAPH
+	University video that the setup tasks such as initializing the shaders
+	is the "plumbing" of OpenGL software development.  It is tedious to
+	write, but it must be set up for OpenGL to work and it may be reused in
+	future programs.  Because many of these commands are required to be
+	written verbatem to make the initShaders work, I opted to rewrite the
+	comments and summarize the function of the code to demonstrate
+	understanding.
+
 - initShaders takes in a pointer to a ShaderInfo struct.  It uses this pointer
     to create a vector of these shaders.  With this vector, the function
     creates and uses a program created from these shaders.
